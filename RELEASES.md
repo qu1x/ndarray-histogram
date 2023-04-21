@@ -1,3 +1,9 @@
+# Version 0.2.0 (2023-04-21)
+
+  * Make `FreedmanDiaconis` strategy more robust. Use improper IQR and Scott's
+    rule as asymptotic resort. Introduce maximum number of bins with `u16::MAX`
+    as default. Compute `n_bins` arithmetically instead of iteratively.
+
 # Version 0.1.0 (2023-04-13)
 
   * Fix binning strategies by using [`ndarray-slice`], which as well comes with
