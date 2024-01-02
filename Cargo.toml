@@ -15,7 +15,7 @@ categories = ["data-structures", "science"]
 [dependencies]
 ndarray = "0.15.6"
 ndarray-slice = "0.2.3"
-noisy_float = "0.2.0"
+ordered-float = "4.2.0"
 num-integer = "0.1.45"
 num-traits = "0.2.17"
 rand = "0.8.5"

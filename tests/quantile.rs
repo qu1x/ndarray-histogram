@@ -4,9 +4,8 @@ use ndarray::prelude::*;
 use ndarray_histogram::{
 	errors::{EmptyInput, MinMaxError, QuantileError},
 	interpolate::{Higher, Interpolate, Linear, Lower, Midpoint, Nearest},
-	Quantile1dExt, QuantileExt,
+	o64, Quantile1dExt, QuantileExt, O64,
 };
-use noisy_float::types::{n64, N64};
 use quickcheck::TestResult;
 use quickcheck_macros::quickcheck;
 
@@ -176,52 +175,52 @@ fn test_max_skipnan_all_nan() {
 #[cfg_attr(miri, ignore)]
 #[test]
 fn test_quantile_mut_with_large_array_of_equal_floats() {
-	let mut array: Array1<N64> = Array1::ones(10_000_000);
-	array.quantile_mut(n64(0.5), &Linear).unwrap();
+	let mut array: Array1<O64> = Array1::ones(10_000_000);
+	array.quantile_mut(o64(0.5), &Linear).unwrap();
 }
 
 #[cfg_attr(miri, ignore)]
 #[test]
 fn test_quantile_mut_with_large_array_of_sorted_floats() {
-	let mut array: Array1<N64> = Array1::range(n64(0.0), n64(1e7), n64(1.0));
-	array.quantile_mut(n64(0.5), &Linear).unwrap();
+	let mut array: Array1<O64> = Array1::range(o64(0.0), o64(1e7), o64(1.0));
+	array.quantile_mut(o64(0.5), &Linear).unwrap();
 }
 
 #[cfg_attr(miri, ignore)]
 #[test]
 fn test_quantile_mut_with_large_array_of_rev_sorted_floats() {
-	let mut array: Array1<N64> = Array1::range(n64(1e7), n64(0.0), n64(-1.0));
-	array.quantile_mut(n64(0.5), &Linear).unwrap();
+	let mut array: Array1<O64> = Array1::range(o64(1e7), o64(0.0), o64(-1.0));
+	array.quantile_mut(o64(0.5), &Linear).unwrap();
 }
 
 #[cfg_attr(miri, ignore)]
 #[test]
 fn test_quantiles_mut_with_large_array_of_equal_floats() {
-	let mut array: Array1<N64> = Array1::ones(10_000_000);
-	let quantiles: Array1<N64> = Array1::range(n64(0.0), n64(1.0), n64(1e-5));
+	let mut array: Array1<O64> = Array1::ones(10_000_000);
+	let quantiles: Array1<O64> = Array1::range(o64(0.0), o64(1.0), o64(1e-5));
 	array.quantiles_mut(&quantiles, &Linear).unwrap();
 }
 
 #[cfg_attr(miri, ignore)]
 #[test]
 fn test_quantiles_mut_with_large_array_of_sorted_floats() {
-	let mut array: Array1<N64> = Array1::range(n64(0.0), n64(1e7), n64(1.0));
-	let quantiles: Array1<N64> = Array1::range(n64(0.0), n64(1.0), n64(1e-5));
+	let mut array: Array1<O64> = Array1::range(o64(0.0), o64(1e7), o64(1.0));
+	let quantiles: Array1<O64> = Array1::range(o64(0.0), o64(1.0), o64(1e-5));
 	array.quantiles_mut(&quantiles, &Linear).unwrap();
 }
 
 #[cfg_attr(miri, ignore)]
 #[test]
 fn test_quantiles_mut_with_large_array_of_rev_sorted_floats() {
-	let mut array: Array1<N64> = Array1::range(n64(1e7), n64(0.0), n64(-1.0));
-	let quantiles: Array1<N64> = Array1::range(n64(0.0), n64(1.0), n64(1e-5));
+	let mut array: Array1<O64> = Array1::range(o64(1e7), o64(0.0), o64(-1.0));
+	let quantiles: Array1<O64> = Array1::range(o64(0.0), o64(1.0), o64(1e-5));
 	array.quantiles_mut(&quantiles, &Linear).unwrap();
 }
 
 #[test]
 fn test_quantile_axis_mut_with_odd_axis_length() {
 	let mut a = arr2(&[[1, 3, 2, 10], [2, 4, 3, 11], [3, 5, 6, 12]]);
-	let p = a.quantile_axis_mut(Axis(0), n64(0.5), &Lower).unwrap();
+	let p = a.quantile_axis_mut(Axis(0), o64(0.5), &Lower).unwrap();
 	assert!(p == a.index_axis(Axis(0), 1));
 }
 
@@ -229,7 +228,7 @@ fn test_quantile_axis_mut_with_odd_axis_length() {
 fn test_quantile_axis_mut_with_zero_axis_length() {
 	let mut a = Array2::<i32>::zeros((5, 0));
 	assert_eq!(
-		a.quantile_axis_mut(Axis(1), n64(0.5), &Lower),
+		a.quantile_axis_mut(Axis(1), o64(0.5), &Lower),
 		Err(QuantileError::EmptyInput)
 	);
 }
@@ -237,28 +236,28 @@ fn test_quantile_axis_mut_with_zero_axis_length() {
 #[test]
 fn test_quantile_axis_mut_with_empty_array() {
 	let mut a = Array2::<i32>::zeros((5, 0));
-	let p = a.quantile_axis_mut(Axis(0), n64(0.5), &Lower).unwrap();
+	let p = a.quantile_axis_mut(Axis(0), o64(0.5), &Lower).unwrap();
 	assert_eq!(p.shape(), &[0]);
 }
 
 #[test]
 fn test_quantile_axis_mut_with_even_axis_length() {
 	let mut b = arr2(&[[1, 3, 2, 10], [2, 4, 3, 11], [3, 5, 6, 12], [4, 6, 7, 13]]);
-	let q = b.quantile_axis_mut(Axis(0), n64(0.5), &Lower).unwrap();
+	let q = b.quantile_axis_mut(Axis(0), o64(0.5), &Lower).unwrap();
 	assert!(q == b.index_axis(Axis(0), 1));
 }
 
 #[test]
 fn test_quantile_axis_mut_to_get_minimum() {
 	let mut b = arr2(&[[1, 3, 22, 10]]);
-	let q = b.quantile_axis_mut(Axis(1), n64(0.), &Lower).unwrap();
+	let q = b.quantile_axis_mut(Axis(1), o64(0.), &Lower).unwrap();
 	assert!(q == arr1(&[1]));
 }
 
 #[test]
 fn test_quantile_axis_mut_to_get_maximum() {
 	let mut b = arr1(&[1, 3, 22, 10]);
-	let q = b.quantile_axis_mut(Axis(0), n64(1.), &Lower).unwrap();
+	let q = b.quantile_axis_mut(Axis(0), o64(1.), &Lower).unwrap();
 	assert!(q == arr0(22));
 }
 
@@ -267,7 +266,7 @@ fn test_quantile_axis_mut_to_get_maximum() {
 fn test_quantile_axis_skipnan_mut_higher_opt_i32() {
 	let mut a = arr2(&[[Some(4), Some(2), None, Some(1), Some(5)], [None; 5]]);
 	let q = a
-		.quantile_axis_skipnan_mut(Axis(1), n64(0.6), &Higher)
+		.quantile_axis_skipnan_mut(Axis(1), o64(0.6), &Higher)
 		.unwrap();
 	assert_eq!(q.shape(), &[2]);
 	assert_eq!(q[0], Some(4));
@@ -279,7 +278,7 @@ fn test_quantile_axis_skipnan_mut_higher_opt_i32() {
 fn test_quantile_axis_skipnan_mut_nearest_opt_i32() {
 	let mut a = arr2(&[[Some(4), Some(2), None, Some(1), Some(5)], [None; 5]]);
 	let q = a
-		.quantile_axis_skipnan_mut(Axis(1), n64(0.6), &Nearest)
+		.quantile_axis_skipnan_mut(Axis(1), o64(0.6), &Nearest)
 		.unwrap();
 	assert_eq!(q.shape(), &[2]);
 	assert_eq!(q[0], Some(4));
@@ -291,7 +290,7 @@ fn test_quantile_axis_skipnan_mut_nearest_opt_i32() {
 fn test_quantile_axis_skipnan_mut_midpoint_opt_i32() {
 	let mut a = arr2(&[[Some(4), Some(2), None, Some(1), Some(5)], [None; 5]]);
 	let q = a
-		.quantile_axis_skipnan_mut(Axis(1), n64(0.6), &Midpoint)
+		.quantile_axis_skipnan_mut(Axis(1), o64(0.6), &Midpoint)
 		.unwrap();
 	assert_eq!(q.shape(), &[2]);
 	assert_eq!(q[0], Some(3));
@@ -303,7 +302,7 @@ fn test_quantile_axis_skipnan_mut_midpoint_opt_i32() {
 fn test_quantile_axis_skipnan_mut_linear_f64() {
 	let mut a = arr2(&[[1., 2., ::std::f64::NAN, 3.], [::std::f64::NAN; 4]]);
 	let q = a
-		.quantile_axis_skipnan_mut(Axis(1), n64(0.75), &Linear)
+		.quantile_axis_skipnan_mut(Axis(1), o64(0.75), &Linear)
 		.unwrap();
 	assert_eq!(q.shape(), &[2]);
 	assert!((q[0] - 2.5).abs() < 1e-12);
@@ -315,7 +314,7 @@ fn test_quantile_axis_skipnan_mut_linear_f64() {
 fn test_quantile_axis_skipnan_mut_linear_opt_i32() {
 	let mut a = arr2(&[[Some(2), Some(4), None, Some(1)], [None; 4]]);
 	let q = a
-		.quantile_axis_skipnan_mut(Axis(1), n64(0.75), &Linear)
+		.quantile_axis_skipnan_mut(Axis(1), o64(0.75), &Linear)
 		.unwrap();
 	assert_eq!(q.shape(), &[2]);
 	assert_eq!(q[0], Some(3));
@@ -327,7 +326,7 @@ fn test_midpoint_overflow() {
 	// Regression test
 	// This triggered an overflow panic with a naive Midpoint implementation: (a+b)/2
 	let mut a: Array1<u8> = array![129, 130, 130, 131];
-	let median = a.quantile_mut(n64(0.5), &Midpoint).unwrap();
+	let median = a.quantile_mut(o64(0.5), &Midpoint).unwrap();
 	let expected_median = 130;
 	assert_eq!(median, expected_median);
 }
@@ -342,15 +341,15 @@ fn test_quantiles_mut(xs: Vec<i64>) -> TestResult {
 
 	// Unordered list of quantile indexes to look up, with a duplicate
 	let quantile_indexes = Array::from(vec![
-		n64(0.75),
-		n64(0.90),
-		n64(0.95),
-		n64(0.99),
-		n64(1.),
-		n64(0.),
-		n64(0.25),
-		n64(0.5),
-		n64(0.5),
+		o64(0.75),
+		o64(0.90),
+		o64(0.95),
+		o64(0.99),
+		o64(1.),
+		o64(0.),
+		o64(0.25),
+		o64(0.5),
+		o64(0.5),
 	]);
 	let mut correct = true;
 	correct &= check_one_interpolation_method_for_quantiles_mut(
@@ -380,7 +379,7 @@ fn test_quantiles_mut(xs: Vec<i64>) -> TestResult {
 
 fn check_one_interpolation_method_for_quantiles_mut(
 	mut v: Array1<i64>,
-	quantile_indexes: ArrayView1<'_, N64>,
+	quantile_indexes: ArrayView1<'_, O64>,
 	interpolate: &impl Interpolate<i64>,
 ) -> bool {
 	let bulk_quantiles = v.clone().quantiles_mut(&quantile_indexes, interpolate);
@@ -405,15 +404,15 @@ fn test_quantiles_axis_mut(mut xs: Vec<u64>) -> bool {
 
 	// Unordered list of quantile indexes to look up, with a duplicate
 	let quantile_indexes = Array::from(vec![
-		n64(0.75),
-		n64(0.90),
-		n64(0.95),
-		n64(0.99),
-		n64(1.),
-		n64(0.),
-		n64(0.25),
-		n64(0.5),
-		n64(0.5),
+		o64(0.75),
+		o64(0.90),
+		o64(0.95),
+		o64(0.99),
+		o64(1.),
+		o64(0.),
+		o64(0.25),
+		o64(0.5),
+		o64(0.5),
 	]);
 
 	// Test out all interpolation methods
@@ -453,7 +452,7 @@ fn test_quantiles_axis_mut(mut xs: Vec<u64>) -> bool {
 
 fn check_one_interpolation_method_for_quantiles_axis_mut(
 	mut v: Array2<u64>,
-	quantile_indexes: ArrayView1<'_, N64>,
+	quantile_indexes: ArrayView1<'_, O64>,
 	axis: Axis,
 	interpolate: &impl Interpolate<u64>,
 ) -> bool {

@@ -1,6 +1,5 @@
 use ndarray::prelude::*;
-use ndarray_histogram::MaybeNan;
-use noisy_float::types::{n64, N64};
+use ndarray_histogram::{n64, MaybeNan, N64};
 
 #[test]
 fn remove_nan_mut_nonstandard_layout() {

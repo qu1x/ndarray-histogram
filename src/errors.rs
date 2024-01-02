@@ -1,6 +1,6 @@
 //! Custom errors returned from our methods and functions.
 
-use noisy_float::types::N64;
+use num_traits::Float;
 use std::error::Error;
 use std::fmt;
 
@@ -113,28 +113,28 @@ impl From<ShapeMismatch> for MultiInputError {
 
 /// An error computing a quantile.
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum QuantileError {
+pub enum QuantileError<F: Float + fmt::Debug> {
 	/// The input was empty.
 	EmptyInput,
 	/// The `q` was not between `0.` and `1.` (inclusive).
-	InvalidQuantile(N64),
+	InvalidQuantile(F),
 }
 
-impl fmt::Display for QuantileError {
+impl<F: Float + fmt::Debug> fmt::Display for QuantileError<F> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
 			QuantileError::EmptyInput => write!(f, "Empty input."),
 			QuantileError::InvalidQuantile(q) => {
-				write!(f, "{:} is not between 0. and 1. (inclusive).", q)
+				write!(f, "{:?} is not between 0. and 1. (inclusive).", q)
 			}
 		}
 	}
 }
 
-impl Error for QuantileError {}
+impl<F: Float + fmt::Debug> Error for QuantileError<F> {}
 
-impl From<EmptyInput> for QuantileError {
-	fn from(_: EmptyInput) -> QuantileError {
+impl<F: Float + fmt::Debug> From<EmptyInput> for QuantileError<F> {
+	fn from(_: EmptyInput) -> QuantileError<F> {
 		QuantileError::EmptyInput
 	}
 }

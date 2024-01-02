@@ -14,15 +14,17 @@ use rayon::slice::ParallelSliceMut;
 /// # Examples
 ///
 /// ```
-/// use ndarray_histogram::histogram::{Bins, Edges};
-/// use noisy_float::types::n64;
+/// use ndarray_histogram::{
+/// 	histogram::{Bins, Edges},
+/// 	o64,
+/// };
 ///
-/// let unit_edges = Edges::from(vec![n64(0.), n64(1.)]);
+/// let unit_edges = Edges::from(vec![o64(0.), o64(1.)]);
 /// let unit_interval = Bins::new(unit_edges);
 /// // left-closed
-/// assert_eq!(unit_interval.range_of(&n64(0.)).unwrap(), n64(0.)..n64(1.),);
+/// assert_eq!(unit_interval.range_of(&o64(0.)).unwrap(), o64(0.)..o64(1.),);
 /// // right-open
-/// assert_eq!(unit_interval.range_of(&n64(1.)), None);
+/// assert_eq!(unit_interval.range_of(&o64(1.)), None);
 /// ```
 ///
 /// [`Bins`]: struct.Bins.html
@@ -128,10 +130,9 @@ impl<A: Ord + Send> Edges<A> {
 	/// # Examples
 	///
 	/// ```
-	/// use ndarray_histogram::histogram::Edges;
-	/// use noisy_float::types::n64;
+	/// use ndarray_histogram::{histogram::Edges, o64};
 	///
-	/// let edges = Edges::from(vec![n64(0.), n64(1.), n64(3.)]);
+	/// let edges = Edges::from(vec![o64(0.), o64(1.), o64(3.)]);
 	/// assert_eq!(edges.len(), 3);
 	/// ```
 	#[must_use]
@@ -144,13 +145,12 @@ impl<A: Ord + Send> Edges<A> {
 	/// # Examples
 	///
 	/// ```
-	/// use ndarray_histogram::histogram::Edges;
-	/// use noisy_float::types::{n64, N64};
+	/// use ndarray_histogram::{histogram::Edges, o64, O64};
 	///
-	/// let edges = Edges::<N64>::from(vec![]);
+	/// let edges = Edges::<O64>::from(vec![]);
 	/// assert_eq!(edges.is_empty(), true);
 	///
-	/// let edges = Edges::from(vec![n64(0.), n64(2.), n64(5.)]);
+	/// let edges = Edges::from(vec![o64(0.), o64(2.), o64(5.)]);
 	/// assert_eq!(edges.is_empty(), false);
 	/// ```
 	#[must_use]
@@ -220,18 +220,20 @@ impl<A: Ord + Send> Edges<A> {
 /// # Examples
 ///
 /// ```
-/// use ndarray_histogram::histogram::{Bins, Edges};
-/// use noisy_float::types::n64;
+/// use ndarray_histogram::{
+/// 	histogram::{Bins, Edges},
+/// 	o64,
+/// };
 ///
-/// let edges = Edges::from(vec![n64(0.), n64(1.), n64(2.)]);
+/// let edges = Edges::from(vec![o64(0.), o64(1.), o64(2.)]);
 /// let bins = Bins::new(edges);
 /// // first bin
 /// assert_eq!(
-///     bins.index(0),
-///     n64(0.)..n64(1.) // n64(1.) is not included in the bin!
+/// 	bins.index(0),
+/// 	o64(0.)..o64(1.) // o64(1.) is not included in the bin!
 /// );
 /// // second bin
-/// assert_eq!(bins.index(1), n64(1.)..n64(2.));
+/// assert_eq!(bins.index(1), o64(1.)..o64(2.));
 /// ```
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Bins<A: Ord + Send> {
@@ -253,10 +255,12 @@ impl<A: Ord + Send> Bins<A> {
 	/// # Examples
 	///
 	/// ```
-	/// use ndarray_histogram::histogram::{Bins, Edges};
-	/// use noisy_float::types::n64;
+	/// use ndarray_histogram::{
+	/// 	histogram::{Bins, Edges},
+	/// 	o64,
+	/// };
 	///
-	/// let edges = Edges::from(vec![n64(0.), n64(1.), n64(2.)]);
+	/// let edges = Edges::from(vec![o64(0.), o64(1.), o64(2.)]);
 	/// let bins = Bins::new(edges);
 	/// assert_eq!(bins.len(), 2);
 	/// ```
@@ -273,19 +277,21 @@ impl<A: Ord + Send> Bins<A> {
 	/// # Examples
 	///
 	/// ```
-	/// use ndarray_histogram::histogram::{Bins, Edges};
-	/// use noisy_float::types::{n64, N64};
+	/// use ndarray_histogram::{
+	/// 	histogram::{Bins, Edges},
+	/// 	o64, O64,
+	/// };
 	///
 	/// // At least 2 edges is needed to represent 1 interval
-	/// let edges = Edges::from(vec![n64(0.), n64(1.), n64(3.)]);
+	/// let edges = Edges::from(vec![o64(0.), o64(1.), o64(3.)]);
 	/// let bins = Bins::new(edges);
 	/// assert_eq!(bins.is_empty(), false);
 	///
 	/// // No valid interval == Empty
-	/// let edges = Edges::<N64>::from(vec![]);
+	/// let edges = Edges::<O64>::from(vec![]);
 	/// let bins = Bins::new(edges);
 	/// assert_eq!(bins.is_empty(), true);
-	/// let edges = Edges::from(vec![n64(0.)]);
+	/// let edges = Edges::from(vec![o64(0.)]);
 	/// let bins = Bins::new(edges);
 	/// assert_eq!(bins.is_empty(), true);
 	/// ```
@@ -322,9 +328,9 @@ impl<A: Ord + Send> Bins<A> {
 	/// # let bins = Bins::new(edges);
 	/// # let value = 1;
 	/// assert_eq!(
-	///     // using `Option::map` to avoid panic on index out-of-bounds
-	///     bins.index_of(&1).map(|i| bins.index(i)),
-	///     Some(0..2)
+	/// 	// using `Option::map` to avoid panic on index out-of-bounds
+	/// 	bins.index_of(&1).map(|i| bins.index(i)),
+	/// 	Some(0..2)
 	/// );
 	/// ```
 	pub fn index_of(&self, value: &A) -> Option<usize> {

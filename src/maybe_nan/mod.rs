@@ -1,7 +1,50 @@
 use ndarray::prelude::*;
 use ndarray::{s, Data, DataMut, RemoveAxis};
-use noisy_float::types::{N32, N64};
+use ordered_float::{NotNan, OrderedFloat};
 use std::mem;
+
+/// A number exclusive NaN and hence *not* implementing [`Float`](`num_traits::Float`).
+pub type N32 = NotNan<f32>;
+/// A number exclusive NaN and hence *not* implementing [`Float`](`num_traits::Float`).
+pub type N64 = NotNan<f64>;
+
+/// Casts [`f32`] into a number.
+///
+/// # Panics
+///
+/// Panics if [`f32`] is NaN.
+#[inline]
+pub fn n32(num: f32) -> N32 {
+	N32::new(num).expect("NaN")
+}
+
+/// Casts [`f64`] into a number.
+///
+/// # Panics
+///
+/// Panics if [`f64`] is NaN.
+#[inline]
+pub fn n64(num: f64) -> N64 {
+	N64::new(num).expect("NaN")
+}
+
+/// Ordered [`f32`] inclusive NaN implementing [`Float`](`num_traits::Float`).
+pub type O32 = OrderedFloat<f32>;
+/// Ordered [`f64`] inclusive NaN implementing [`Float`](`num_traits::Float`).
+pub type O64 = OrderedFloat<f64>;
+
+/// Casts [`f32`] into an ordered float.
+#[must_use]
+#[inline]
+pub fn o32(num: f32) -> O32 {
+	OrderedFloat(num)
+}
+/// Casts [`f64`] into an ordered float.
+#[must_use]
+#[inline]
+pub fn o64(num: f64) -> O64 {
+	OrderedFloat(num)
+}
 
 /// A number type that can have not-a-number values.
 pub trait MaybeNan: Sized {
@@ -9,6 +52,7 @@ pub trait MaybeNan: Sized {
 	type NotNan;
 
 	/// Returns `true` if the value is a NaN value.
+	#[must_use]
 	fn is_nan(&self) -> bool;
 
 	/// Tries to convert the value to `NotNan`.
@@ -19,16 +63,19 @@ pub trait MaybeNan: Sized {
 	/// Converts the value.
 	///
 	/// If the value is `None`, a NaN value is returned.
+	#[must_use]
 	fn from_not_nan(_: Self::NotNan) -> Self;
 
 	/// Converts the value.
 	///
 	/// If the value is `None`, a NaN value is returned.
+	#[must_use]
 	fn from_not_nan_opt(_: Option<Self::NotNan>) -> Self;
 
 	/// Converts the value.
 	///
 	/// If the value is `None`, a NaN value is returned.
+	#[must_use]
 	fn from_not_nan_ref_opt(_: Option<&Self::NotNan>) -> &Self;
 
 	/// Returns a view with the NaN values removed.
@@ -37,6 +84,7 @@ pub trait MaybeNan: Sized {
 	/// order of the elements is unspecified. However, this method is
 	/// idempotent, and given the same input data, the result is always ordered
 	/// the same way.
+	#[must_use]
 	fn remove_nan_mut(_: ArrayViewMut1<'_, Self>) -> ArrayViewMut1<'_, Self::NotNan>;
 }
 
@@ -111,25 +159,30 @@ macro_rules! impl_maybenan_for_fxx {
 		impl MaybeNan for $fxx {
 			type NotNan = $Nxx;
 
+			#[inline]
 			fn is_nan(&self) -> bool {
 				$fxx::is_nan(*self)
 			}
 
+			#[inline]
 			fn try_as_not_nan(&self) -> Option<&$Nxx> {
-				$Nxx::try_borrowed(self)
+				(!self.is_nan()).then(|| unsafe { mem::transmute(self) })
 			}
 
+			#[inline]
 			fn from_not_nan(value: $Nxx) -> $fxx {
-				value.raw()
+				*value
 			}
 
+			#[inline]
 			fn from_not_nan_opt(value: Option<$Nxx>) -> $fxx {
 				match value {
 					None => ::std::$fxx::NAN,
-					Some(num) => num.raw(),
+					Some(num) => *num,
 				}
 			}
 
+			#[inline]
 			fn from_not_nan_ref_opt(value: Option<&$Nxx>) -> &$fxx {
 				match value {
 					None => &::std::$fxx::NAN,
@@ -137,6 +190,7 @@ macro_rules! impl_maybenan_for_fxx {
 				}
 			}
 
+			#[inline]
 			fn remove_nan_mut(view: ArrayViewMut1<'_, $fxx>) -> ArrayViewMut1<'_, $Nxx> {
 				let not_nan = remove_nan_mut(view);
 				// This is safe because `remove_nan_mut` has removed the NaN values, and `$Nxx` is
@@ -149,15 +203,103 @@ macro_rules! impl_maybenan_for_fxx {
 impl_maybenan_for_fxx!(f32, N32);
 impl_maybenan_for_fxx!(f64, N64);
 
+impl MaybeNan for O32 {
+	type NotNan = N32;
+
+	#[inline]
+	fn is_nan(&self) -> bool {
+		self.0.is_nan()
+	}
+
+	#[inline]
+	fn try_as_not_nan(&self) -> Option<&N32> {
+		(!self.is_nan()).then(|| unsafe { mem::transmute::<&O32, &N32>(self) })
+	}
+
+	#[inline]
+	fn from_not_nan(value: N32) -> O32 {
+		o32(*value)
+	}
+
+	#[inline]
+	fn from_not_nan_opt(value: Option<N32>) -> O32 {
+		match value {
+			None => o32(::std::f32::NAN),
+			Some(num) => o32(*num),
+		}
+	}
+
+	#[inline]
+	fn from_not_nan_ref_opt(value: Option<&N32>) -> &O32 {
+		match value {
+			None => unsafe { mem::transmute::<&f64, &O32>(&::std::f64::NAN) },
+			Some(num) => unsafe { mem::transmute::<&N32, &O32>(num) },
+		}
+	}
+
+	#[inline]
+	fn remove_nan_mut(view: ArrayViewMut1<'_, O32>) -> ArrayViewMut1<'_, N32> {
+		let not_nan = remove_nan_mut(view);
+		// This is safe because `remove_nan_mut` has removed the NaN values, and `N32` is
+		// a thin wrapper around `f32`.
+		unsafe { cast_view_mut(not_nan) }
+	}
+}
+
+impl MaybeNan for O64 {
+	type NotNan = N64;
+
+	#[inline]
+	fn is_nan(&self) -> bool {
+		self.0.is_nan()
+	}
+
+	#[inline]
+	fn try_as_not_nan(&self) -> Option<&N64> {
+		(!self.is_nan()).then(|| unsafe { mem::transmute::<&O64, &N64>(self) })
+	}
+
+	#[inline]
+	fn from_not_nan(value: N64) -> O64 {
+		o64(*value)
+	}
+
+	#[inline]
+	fn from_not_nan_opt(value: Option<N64>) -> O64 {
+		match value {
+			None => o64(::std::f64::NAN),
+			Some(num) => o64(*num),
+		}
+	}
+
+	#[inline]
+	fn from_not_nan_ref_opt(value: Option<&N64>) -> &O64 {
+		match value {
+			None => unsafe { mem::transmute::<&f64, &O64>(&::std::f64::NAN) },
+			Some(num) => unsafe { mem::transmute::<&N64, &O64>(num) },
+		}
+	}
+
+	#[inline]
+	fn remove_nan_mut(view: ArrayViewMut1<'_, O64>) -> ArrayViewMut1<'_, N64> {
+		let not_nan = remove_nan_mut(view);
+		// This is safe because `remove_nan_mut` has removed the NaN values, and `N64` is
+		// a thin wrapper around `f64`.
+		unsafe { cast_view_mut(not_nan) }
+	}
+}
+
 macro_rules! impl_maybenan_for_opt_never_nan {
 	($ty:ty) => {
 		impl MaybeNan for Option<$ty> {
 			type NotNan = NotNone<$ty>;
 
+			#[inline]
 			fn is_nan(&self) -> bool {
 				self.is_none()
 			}
 
+			#[inline]
 			fn try_as_not_nan(&self) -> Option<&NotNone<$ty>> {
 				if self.is_none() {
 					None
@@ -168,14 +310,17 @@ macro_rules! impl_maybenan_for_opt_never_nan {
 				}
 			}
 
+			#[inline]
 			fn from_not_nan(value: NotNone<$ty>) -> Option<$ty> {
 				value.into_inner()
 			}
 
+			#[inline]
 			fn from_not_nan_opt(value: Option<NotNone<$ty>>) -> Option<$ty> {
 				value.and_then(|v| v.into_inner())
 			}
 
+			#[inline]
 			fn from_not_nan_ref_opt(value: Option<&NotNone<$ty>>) -> &Option<$ty> {
 				match value {
 					None => &None,
@@ -185,6 +330,7 @@ macro_rules! impl_maybenan_for_opt_never_nan {
 				}
 			}
 
+			#[inline]
 			fn remove_nan_mut(view: ArrayViewMut1<'_, Self>) -> ArrayViewMut1<'_, Self::NotNan> {
 				let not_nan = remove_nan_mut(view);
 				// This is safe because `remove_nan_mut` has removed the `None`
@@ -220,6 +366,7 @@ pub struct NotNone<T>(Option<T>);
 
 impl<T> NotNone<T> {
 	/// Creates a new `NotNone` containing the given value.
+	#[inline]
 	pub fn new(value: T) -> NotNone<T> {
 		NotNone(Some(value))
 	}
@@ -227,6 +374,7 @@ impl<T> NotNone<T> {
 	/// Creates a new `NotNone` containing the given value.
 	///
 	/// Returns `None` if `value` is `None`.
+	#[inline]
 	pub fn try_new(value: Option<T>) -> Option<NotNone<T>> {
 		if value.is_some() {
 			Some(NotNone(value))
@@ -236,6 +384,7 @@ impl<T> NotNone<T> {
 	}
 
 	/// Returns the underling option.
+	#[inline]
 	pub fn into_inner(self) -> Option<T> {
 		self.0
 	}
@@ -243,6 +392,7 @@ impl<T> NotNone<T> {
 	/// Moves the value out of the inner option.
 	///
 	/// This method is guaranteed not to panic.
+	#[inline]
 	pub fn unwrap(self) -> T {
 		match self.0 {
 			Some(inner) => inner,
@@ -252,6 +402,7 @@ impl<T> NotNone<T> {
 
 	/// Maps an `NotNone<T>` to `NotNone<U>` by applying a function to the
 	/// contained value.
+	#[inline]
 	pub fn map<U, F>(self, f: F) -> NotNone<U>
 	where
 		F: FnOnce(T) -> U,

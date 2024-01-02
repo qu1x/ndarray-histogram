@@ -12,7 +12,7 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 pub use crate::histogram::HistogramExt;
-pub use crate::maybe_nan::{MaybeNan, MaybeNanExt};
+pub use crate::maybe_nan::{n32, n64, o32, o64, MaybeNan, MaybeNanExt, N32, N64, O32, O64};
 pub use crate::quantile::{interpolate, Quantile1dExt, QuantileExt};
 
 pub use ndarray;

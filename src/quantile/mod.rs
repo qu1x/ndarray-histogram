@@ -5,8 +5,8 @@ use crate::{MaybeNan, MaybeNanExt};
 use ndarray::prelude::*;
 use ndarray::{Data, DataMut, RemoveAxis, Zip};
 use ndarray_slice::Slice1Ext;
-use noisy_float::types::N64;
-use std::{cmp, collections::HashMap};
+use num_traits::Float;
+use std::{cmp, collections::HashMap, fmt::Debug};
 
 /// Quantile methods for `ArrayBase`.
 pub trait QuantileExt<A, S, D>
@@ -202,16 +202,17 @@ where
 	/// Returns `Err(InvalidQuantile(q))` if `q` is not between `0.` and `1.` (inclusive).
 	///
 	/// **Panics** if `axis` is out of bounds.
-	fn quantile_axis_mut<I>(
+	fn quantile_axis_mut<F, I>(
 		&mut self,
 		axis: Axis,
-		q: N64,
+		q: F,
 		interpolate: &I,
-	) -> Result<Array<A, D::Smaller>, QuantileError>
+	) -> Result<Array<A, D::Smaller>, QuantileError<F>>
 	where
 		D: RemoveAxis,
 		A: Ord + Send + Clone,
 		S: DataMut,
+		F: Float + Debug,
 		I: Interpolate<A>;
 
 	/// A bulk version of [`quantile_axis_mut`], optimized to retrieve multiple
@@ -236,45 +237,46 @@ where
 	/// ```rust
 	/// use ndarray::{array, aview1, Axis};
 	/// use ndarray_histogram::{interpolate::Nearest, QuantileExt};
-	/// use noisy_float::types::n64;
 	///
 	/// let mut data = array![[3, 4, 5], [6, 7, 8]];
 	/// let axis = Axis(1);
-	/// let qs = &[n64(0.3), n64(0.7)];
+	/// let qs = &[0.3, 0.7];
 	/// let quantiles = data
-	///     .quantiles_axis_mut(axis, &aview1(qs), &Nearest)
-	///     .unwrap();
+	/// 	.quantiles_axis_mut(axis, &aview1(qs), &Nearest)
+	/// 	.unwrap();
 	/// for (&q, quantile) in qs.iter().zip(quantiles.axis_iter(axis)) {
-	///     assert_eq!(quantile, data.quantile_axis_mut(axis, q, &Nearest).unwrap());
+	/// 	assert_eq!(quantile, data.quantile_axis_mut(axis, q, &Nearest).unwrap());
 	/// }
 	/// ```
-	fn quantiles_axis_mut<S2, I>(
+	fn quantiles_axis_mut<S2, F, I>(
 		&mut self,
 		axis: Axis,
 		qs: &ArrayBase<S2, Ix1>,
 		interpolate: &I,
-	) -> Result<Array<A, D>, QuantileError>
+	) -> Result<Array<A, D>, QuantileError<F>>
 	where
 		D: RemoveAxis,
 		A: Ord + Send + Clone,
 		S: DataMut,
-		S2: Data<Elem = N64>,
+		S2: Data<Elem = F>,
+		F: Float + Debug,
 		I: Interpolate<A>;
 
 	/// Return the `q`th quantile of the data along the specified axis, skipping NaN values.
 	///
 	/// See [`quantile_axis_mut`](#tymethod.quantile_axis_mut) for details.
-	fn quantile_axis_skipnan_mut<I>(
+	fn quantile_axis_skipnan_mut<F, I>(
 		&mut self,
 		axis: Axis,
-		q: N64,
+		q: F,
 		interpolate: &I,
-	) -> Result<Array<A, D::Smaller>, QuantileError>
+	) -> Result<Array<A, D::Smaller>, QuantileError<F>>
 	where
 		D: RemoveAxis,
 		A: MaybeNan,
 		A::NotNan: Clone + Ord + Send,
 		S: DataMut,
+		F: Float + Debug,
 		I: Interpolate<A::NotNan>;
 
 	private_decl! {}
@@ -420,33 +422,35 @@ where
 		}))
 	}
 
-	fn quantiles_axis_mut<S2, I>(
+	fn quantiles_axis_mut<S2, F, I>(
 		&mut self,
 		axis: Axis,
 		qs: &ArrayBase<S2, Ix1>,
 		interpolate: &I,
-	) -> Result<Array<A, D>, QuantileError>
+	) -> Result<Array<A, D>, QuantileError<F>>
 	where
 		D: RemoveAxis,
 		A: Ord + Send + Clone,
 		S: DataMut,
-		S2: Data<Elem = N64>,
+		S2: Data<Elem = F>,
+		F: Float + Debug,
 		I: Interpolate<A>,
 	{
 		// Minimize number of type parameters to avoid monomorphization bloat.
-		fn quantiles_axis_mut<A, D, I>(
+		fn quantiles_axis_mut<A, D, F, I>(
 			mut data: ArrayViewMut<'_, A, D>,
 			axis: Axis,
-			qs: ArrayView1<'_, N64>,
+			qs: ArrayView1<'_, F>,
 			_interpolate: &I,
-		) -> Result<Array<A, D>, QuantileError>
+		) -> Result<Array<A, D>, QuantileError<F>>
 		where
 			D: RemoveAxis,
 			A: Ord + Send + Clone,
+			F: Float + Debug,
 			I: Interpolate<A>,
 		{
 			for &q in qs {
-				if !(0. ..=1.).contains(&q.raw()) {
+				if !(F::from(0.).unwrap()..=F::from(1.).unwrap()).contains(&q) {
 					return Err(QuantileError::InvalidQuantile(q));
 				}
 			}
@@ -513,36 +517,38 @@ where
 		quantiles_axis_mut(self.view_mut(), axis, qs.view(), interpolate)
 	}
 
-	fn quantile_axis_mut<I>(
+	fn quantile_axis_mut<F, I>(
 		&mut self,
 		axis: Axis,
-		q: N64,
+		q: F,
 		interpolate: &I,
-	) -> Result<Array<A, D::Smaller>, QuantileError>
+	) -> Result<Array<A, D::Smaller>, QuantileError<F>>
 	where
 		D: RemoveAxis,
 		A: Ord + Send + Clone,
 		S: DataMut,
+		F: Float + Debug,
 		I: Interpolate<A>,
 	{
 		self.quantiles_axis_mut(axis, &aview1(&[q]), interpolate)
 			.map(|a| a.index_axis_move(axis, 0))
 	}
 
-	fn quantile_axis_skipnan_mut<I>(
+	fn quantile_axis_skipnan_mut<F, I>(
 		&mut self,
 		axis: Axis,
-		q: N64,
+		q: F,
 		interpolate: &I,
-	) -> Result<Array<A, D::Smaller>, QuantileError>
+	) -> Result<Array<A, D::Smaller>, QuantileError<F>>
 	where
 		D: RemoveAxis,
 		A: MaybeNan,
 		A::NotNan: Clone + Ord + Send,
 		S: DataMut,
+		F: Float + Debug,
 		I: Interpolate<A::NotNan>,
 	{
-		if !(0. ..=1.).contains(&q.raw()) {
+		if !(F::from(0.).unwrap()..=F::from(1.).unwrap()).contains(&q) {
 			return Err(QuantileError::InvalidQuantile(q));
 		}
 
@@ -557,7 +563,7 @@ where
 			} else {
 				Some(
 					not_nan
-						.quantile_axis_mut::<I>(Axis(0), q, interpolate)
+						.quantile_axis_mut::<F, I>(Axis(0), q, interpolate)
 						.unwrap()
 						.into_scalar(),
 				)
@@ -604,10 +610,11 @@ where
 	/// Returns `Err(EmptyInput)` if the array is empty.
 	///
 	/// Returns `Err(InvalidQuantile(q))` if `q` is not between `0.` and `1.` (inclusive).
-	fn quantile_mut<I>(&mut self, q: N64, interpolate: &I) -> Result<A, QuantileError>
+	fn quantile_mut<F, I>(&mut self, q: F, interpolate: &I) -> Result<A, QuantileError<F>>
 	where
 		A: Ord + Send + Clone,
 		S: DataMut,
+		F: Float + Debug,
 		I: Interpolate<A>;
 
 	/// A bulk version of [`quantile_mut`], optimized to retrieve multiple
@@ -625,15 +632,16 @@ where
 	/// used to retrieve them.
 	///
 	/// [`quantile_mut`]: #tymethod.quantile_mut
-	fn quantiles_mut<S2, I>(
+	fn quantiles_mut<S2, F, I>(
 		&mut self,
 		qs: &ArrayBase<S2, Ix1>,
 		interpolate: &I,
-	) -> Result<Array1<A>, QuantileError>
+	) -> Result<Array1<A>, QuantileError<F>>
 	where
 		A: Ord + Send + Clone,
 		S: DataMut,
-		S2: Data<Elem = N64>,
+		F: Float + Debug,
+		S2: Data<Elem = F>,
 		I: Interpolate<A>;
 
 	private_decl! {}
@@ -644,10 +652,11 @@ where
 	A: Send,
 	S: Data<Elem = A>,
 {
-	fn quantile_mut<I>(&mut self, q: N64, interpolate: &I) -> Result<A, QuantileError>
+	fn quantile_mut<F, I>(&mut self, q: F, interpolate: &I) -> Result<A, QuantileError<F>>
 	where
 		A: Ord + Send + Clone,
 		S: DataMut,
+		F: Float + Debug,
 		I: Interpolate<A>,
 	{
 		Ok(self
@@ -655,15 +664,16 @@ where
 			.into_scalar())
 	}
 
-	fn quantiles_mut<S2, I>(
+	fn quantiles_mut<S2, F, I>(
 		&mut self,
 		qs: &ArrayBase<S2, Ix1>,
 		interpolate: &I,
-	) -> Result<Array1<A>, QuantileError>
+	) -> Result<Array1<A>, QuantileError<F>>
 	where
 		A: Ord + Send + Clone,
 		S: DataMut,
-		S2: Data<Elem = N64>,
+		F: Float + Debug,
+		S2: Data<Elem = F>,
 		I: Interpolate<A>,
 	{
 		self.quantiles_axis_mut(Axis(0), qs, interpolate)

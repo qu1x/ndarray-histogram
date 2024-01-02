@@ -25,15 +25,17 @@ impl<A: Ord + Send> Histogram<A> {
 	/// # Example:
 	/// ```
 	/// use ndarray::array;
-	/// use ndarray_histogram::histogram::{Bins, Edges, Grid, Histogram};
-	/// use noisy_float::types::n64;
+	/// use ndarray_histogram::{
+	/// 	histogram::{Bins, Edges, Grid, Histogram},
+	/// 	o64,
+	/// };
 	///
-	/// let edges = Edges::from(vec![n64(-1.), n64(0.), n64(1.)]);
+	/// let edges = Edges::from(vec![o64(-1.), o64(0.), o64(1.)]);
 	/// let bins = Bins::new(edges);
 	/// let square_grid = Grid::from(vec![bins.clone(), bins.clone()]);
 	/// let mut histogram = Histogram::new(square_grid);
 	///
-	/// let observation = array![n64(0.5), n64(0.6)];
+	/// let observation = array![o64(0.5), o64(0.6)];
 	///
 	/// histogram.add_observation(&observation)?;
 	///
@@ -97,23 +99,22 @@ where
 	/// ```
 	/// use ndarray::array;
 	/// use ndarray_histogram::{
-	///     histogram::{strategies::Sqrt, Bins, Edges, Grid, GridBuilder, Histogram},
-	///     HistogramExt,
+	/// 	histogram::{strategies::Sqrt, Bins, Edges, Grid, GridBuilder, Histogram},
+	/// 	o64, HistogramExt, O64,
 	/// };
-	/// use noisy_float::types::{n64, N64};
 	///
 	/// let observations = array![
-	///     [n64(1.), n64(0.5)],
-	///     [n64(-0.5), n64(1.)],
-	///     [n64(-1.), n64(-0.5)],
-	///     [n64(0.5), n64(-1.)]
+	/// 	[o64(1.), o64(0.5)],
+	/// 	[o64(-0.5), o64(1.)],
+	/// 	[o64(-1.), o64(-0.5)],
+	/// 	[o64(0.5), o64(-1.)]
 	/// ];
-	/// let grid = GridBuilder::<Sqrt<N64>>::from_array(&observations)
-	///     .unwrap()
-	///     .build();
+	/// let grid = GridBuilder::<Sqrt<O64>>::from_array(&observations)
+	/// 	.unwrap()
+	/// 	.build();
 	/// let expected_grid = Grid::from(vec![
-	///     Bins::new(Edges::from(vec![n64(-1.), n64(0.), n64(1.), n64(2.)])),
-	///     Bins::new(Edges::from(vec![n64(-1.), n64(0.), n64(1.), n64(2.)])),
+	/// 	Bins::new(Edges::from(vec![o64(-1.), o64(0.), o64(1.), o64(2.)])),
+	/// 	Bins::new(Edges::from(vec![o64(-1.), o64(0.), o64(1.), o64(2.)])),
 	/// ]);
 	/// assert_eq!(grid, expected_grid);
 	///

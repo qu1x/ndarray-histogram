@@ -51,7 +51,6 @@ use crate::{
 	quantile::{interpolate::Nearest, Quantile1dExt, QuantileExt},
 };
 use ndarray::{prelude::*, Data};
-use noisy_float::types::n64;
 use num_traits::{FromPrimitive, NumOps, ToPrimitive, Zero};
 
 /// A trait implemented by all strategies to build [`Bins`] with parameters inferred from
@@ -482,8 +481,8 @@ where
 		let mut at = 0.5;
 		while at >= 1. / 512. {
 			at *= 0.5;
-			let first_quartile = a_copy.quantile_mut(n64(at), &Nearest).unwrap();
-			let third_quartile = a_copy.quantile_mut(n64(1. - at), &Nearest).unwrap();
+			let first_quartile = a_copy.quantile_mut(at, &Nearest).unwrap();
+			let third_quartile = a_copy.quantile_mut(1. - at, &Nearest).unwrap();
 			let iqr = third_quartile - first_quartile;
 			let denom = T::from_f64((1. - 2. * at) * n_cbrt).unwrap();
 			if denom == T::zero() {

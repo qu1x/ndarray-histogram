@@ -63,18 +63,18 @@ use std::ops::Range;
 /// ```
 /// use ndarray::{array, Array};
 /// use ndarray_histogram::{
-///     histogram::{strategies::Auto, Bins, Edges, Grid, GridBuilder},
-///     HistogramExt,
+/// 	histogram::{strategies::Auto, Bins, Edges, Grid, GridBuilder},
+/// 	HistogramExt,
 /// };
 ///
 /// // 1-dimensional observations, as a (n_observations, n_dimension) 2-d matrix
 /// let observations =
-///     Array::from_shape_vec((12, 1), vec![1, 4, 5, 2, 100, 20, 50, 65, 27, 40, 45, 23]).unwrap();
+/// 	Array::from_shape_vec((12, 1), vec![1, 4, 5, 2, 100, 20, 50, 65, 27, 40, 45, 23]).unwrap();
 ///
 /// // The optimal grid layout is inferred from the data, given a chosen strategy, Auto in this case
 /// let grid = GridBuilder::<Auto<usize>>::from_array(&observations)
-///     .unwrap()
-///     .build();
+/// 	.unwrap()
+/// 	.build();
 ///
 /// let histogram = observations.histogram(grid);
 ///
@@ -166,35 +166,36 @@ impl<A: Ord + Send> Grid<A> {
 	///
 	/// ```
 	/// use ndarray::array;
-	/// use ndarray_histogram::histogram::{Bins, Edges, Grid};
-	/// use noisy_float::types::n64;
+	/// use ndarray_histogram::{
+	/// 	histogram::{Bins, Edges, Grid},
+	/// 	o64,
+	/// };
 	///
-	/// let edges = Edges::from(vec![n64(-1.), n64(0.), n64(1.)]);
+	/// let edges = Edges::from(vec![o64(-1.), o64(0.), o64(1.)]);
 	/// let bins = Bins::new(edges);
 	/// let square_grid = Grid::from(vec![bins.clone(), bins.clone()]);
 	///
 	/// // (0., -0.7) falls in 1st and 0th bin respectively
 	/// assert_eq!(
-	///     square_grid.index_of(&array![n64(0.), n64(-0.7)]),
-	///     Some(vec![1, 0]),
+	/// 	square_grid.index_of(&array![o64(0.), o64(-0.7)]),
+	/// 	Some(vec![1, 0]),
 	/// );
 	/// // Returns `None`, as `1.` is outside the grid since bins are right-open
-	/// assert_eq!(square_grid.index_of(&array![n64(0.), n64(1.)]), None,);
+	/// assert_eq!(square_grid.index_of(&array![o64(0.), o64(1.)]), None,);
 	/// ```
 	///
 	/// A panic upon dimensionality mismatch:
 	///
 	/// ```should_panic
 	/// # use ndarray::array;
-	/// # use ndarray_histogram::histogram::{Edges, Bins, Grid};
-	/// # use noisy_float::types::n64;
-	/// # let edges = Edges::from(vec![n64(-1.), n64(0.), n64(1.)]);
+	/// # use ndarray_histogram::{histogram::{Edges, Bins, Grid}, o64};
+	/// # let edges = Edges::from(vec![o64(-1.), o64(0.), o64(1.)]);
 	/// # let bins = Bins::new(edges);
 	/// # let square_grid = Grid::from(vec![bins.clone(), bins.clone()]);
 	/// // the point has 3 dimensions, the grid expected 2 dimensions
 	/// assert_eq!(
-	///     square_grid.index_of(&array![n64(0.), n64(-0.7), n64(0.5)]),
-	///     Some(vec![1, 0, 1]),
+	/// 	square_grid.index_of(&array![o64(0.), o64(-0.7), o64(0.5)]),
+	/// 	Some(vec![1, 0, 1]),
 	/// );
 	/// ```
 	pub fn index_of<S>(&self, point: &ArrayBase<S, Ix1>) -> Option<Vec<usize>>
@@ -287,15 +288,15 @@ impl<A: Ord + Send + Clone> Grid<A> {
 ///
 /// // 1-dimensional observations, as a (n_observations, n_dimension) 2-d matrix
 /// let observations =
-///     Array::from_shape_vec((12, 1), vec![1, 4, 5, 2, 100, 20, 50, 65, 27, 40, 45, 23]).unwrap();
+/// 	Array::from_shape_vec((12, 1), vec![1, 4, 5, 2, 100, 20, 50, 65, 27, 40, 45, 23]).unwrap();
 ///
 /// // The optimal grid layout is inferred from the data, given a chosen strategy, Auto in this case
 /// let grid = GridBuilder::<Auto<usize>>::from_array(&observations)
-///     .unwrap()
-///     .build();
+/// 	.unwrap()
+/// 	.build();
 /// // Equivalently, build a Grid directly
 /// let expected_grid = Grid::from(vec![Bins::new(Edges::from(vec![
-///     1, 20, 39, 58, 77, 96, 115,
+/// 	1, 20, 39, 58, 77, 96, 115,
 /// ]))]);
 ///
 /// assert_eq!(grid, expected_grid);
