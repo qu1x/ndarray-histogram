@@ -1,3 +1,7 @@
+# Version 0.3.0 (2024-01-02)
+
+  * Migrate from `noisy_float` to `ordered-float`.
+
 # Version 0.2.0 (2023-04-21)
 
   * Make `FreedmanDiaconis` strategy more robust. Use improper IQR and Scott's
