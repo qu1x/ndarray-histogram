@@ -11,7 +11,7 @@
 [Documentation]: https://docs.rs/ndarray-histogram/badge.svg
 [Downloads]: https://img.shields.io/crates/d/ndarray-histogram.svg
 [Version]: https://img.shields.io/crates/v/ndarray-histogram.svg
-[Rust]: https://img.shields.io/badge/rust-v1.60-brightgreen.svg
+[Rust]: https://img.shields.io/badge/rust-v1.70.0-brightgreen.svg
 [License]: https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg
 
 Histogram support for n-dimensional arrays ([`ndarray`]).
@@ -24,7 +24,7 @@ See the [release history](RELEASES.md) to keep track of the development.
 
 # License
 
-Copyright © 2023 Rouven Spreckels <rs@qu1x.dev>
+Copyright © 2023-2024 Rouven Spreckels <rs@qu1x.dev>
 
 Copyright © 2018–2022 [`ndarray-stats`] Developers
 
