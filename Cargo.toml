@@ -1,6 +1,6 @@
 [package]
 name = "ndarray-histogram"
-version = "0.3.0"
+version = "0.3.1"
 rust-version = "1.70.0"
 edition = "2021"
 authors = ["Rouven Spreckels <rs@qu1x.dev>"]
@@ -14,13 +14,13 @@ categories = ["data-structures", "science"]
 
 [dependencies]
 ndarray = "0.15.6"
-ndarray-slice = "0.2.3"
+ndarray-slice = "0.3.0"
 ordered-float = "4.2.0"
-num-integer = "0.1.45"
-num-traits = "0.2.17"
+num-integer = "0.1.46"
+num-traits = "0.2.19"
 rand = "0.8.5"
-itertools = { version = "0.12.0", default-features = false }
-rayon = { version = "1.8.0", optional = true }
+itertools = { version = "0.13.0", default-features = false }
+rayon = { version = "1.10.0", optional = true }
 
 [dev-dependencies]
 criterion = "0.5.1"
