@@ -1,3 +1,7 @@
+# Version 0.3.1 (2024-06-13)
+
+  * Bump dependencies.
+
 # Version 0.3.0 (2024-01-02)
 
   * Migrate from `noisy_float` to `ordered-float`.
