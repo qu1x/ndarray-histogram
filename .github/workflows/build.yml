@@ -60,4 +60,4 @@ jobs:
     - name: fmt
       run: cargo fmt --all --check
     - name: miri
-      run: cargo miri test
+      run: cargo miri test --no-default-features

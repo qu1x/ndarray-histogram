@@ -14,7 +14,7 @@ categories = ["data-structures", "science"]
 
 [dependencies]
 ndarray = "0.15.6"
-ndarray-slice = "0.3.1"
+ndarray-slice = { version = "0.3.1", default-features = false, features = ["std"] }
 ordered-float = "4.2.0"
 num-integer = "0.1.46"
 num-traits = "0.2.19"
@@ -28,6 +28,7 @@ quickcheck = { version = "1.0.3", default-features = false }
 quickcheck_macros = "1.0.0"
 
 [features]
+default = ["ndarray-slice/stacker"]
 rayon = ["dep:rayon", "ndarray-slice/rayon", "ndarray/rayon"]
 
 [[bench]]
