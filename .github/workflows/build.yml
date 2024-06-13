@@ -10,88 +10,54 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+    - name: msrv
+      run: |
+        msrv=$(cargo metadata --no-deps --format-version 1 |
+          jq --raw-output '.packages[] | select(.name=="ndarray-histogram") | .rust_version')
+        echo "MSRV=$msrv" >> $GITHUB_ENV
     - name: toolchain
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.70.0
-        profile: minimal
+        toolchain: ${{ env.MSRV }}
         components: rustfmt, rust-docs, clippy
-        override: true
     - name: test
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
+      run: cargo test
     - name: test-rayon
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --features rayon
+      run: cargo test --features rayon
     - name: clippy
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: --all
+      run: cargo clippy --all
     - name: doc
-      uses: actions-rs/cargo@v1
-      with:
-        command: doc
+      run: cargo doc
     - name: doc-rayon
-      uses: actions-rs/cargo@v1
-      with:
-        command: doc
-        args: --features rayon
+      run: cargo doc --features rayon
     - name: fmt
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all --check
+      run: cargo fmt --all --check
   nightly:
     runs-on: ubuntu-latest
     steps:
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: toolchain
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@master
       with:
         toolchain: nightly
-        profile: minimal
         components: rustfmt, rust-docs, clippy, miri
-        override: true
     - name: test
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
+      run: cargo test
     - name: test-rayon
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --features rayon
+      run: cargo test --features rayon
     - name: clippy
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: --all
+      run: cargo clippy --all
     - name: doc
-      uses: actions-rs/cargo@v1
-      with:
-        command: doc
+      run: cargo doc
       env:
         RUSTDOCFLAGS: "--cfg docsrs"
     - name: doc-rayon
-      uses: actions-rs/cargo@v1
-      with:
-        command: doc
-        args: --features rayon
+      run: cargo doc --features rayon
       env:
         RUSTDOCFLAGS: "--cfg docsrs"
     - name: fmt
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all --check
+      run: cargo fmt --all --check
     - name: miri
-      uses: actions-rs/cargo@v1
-      with:
-        command: miri
-        args: test
+      run: cargo miri test
