@@ -1,6 +1,6 @@
 [package]
 name = "ndarray-histogram"
-version = "0.3.1"
+version = "0.4.0"
 rust-version = "1.74.0"
 edition = "2021"
 authors = ["Rouven Spreckels <rs@qu1x.dev>"]
@@ -13,9 +13,9 @@ keywords = ["array", "multidimensional", "statistics", "matrix", "ndarray"]
 categories = ["data-structures", "science"]
 
 [dependencies]
-ndarray = "0.15.6"
-ndarray-slice = { version = "0.3.1", default-features = false, features = ["std"] }
-ordered-float = "4.2.0"
+ndarray = "0.16.1"
+ndarray-slice = { version = "0.4.0", default-features = false, features = ["std"] }
+ordered-float = "4.2.2"
 num-integer = "0.1.46"
 num-traits = "0.2.19"
 rand = "0.8.5"
