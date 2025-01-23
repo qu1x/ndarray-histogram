@@ -182,7 +182,7 @@ pub struct Sturges<T> {
 ///
 /// Let `n` be the number of observations and `at = 1 / 4`.
 ///
-/// `bin_width` = (1 - 2 × `at`) × `IQR` × `n`<sup>−1/3</sup>
+/// `bin_width` = `IQR` × `n`<sup>−1/3</sup> / (1 - 2 × `at`)
 ///
 /// The bin width is proportional to the interquartile range ([`IQR`]) from `at` to `1 - at` and
 /// inversely proportional to cube root of `n`. It can be too conservative for small datasets, but
