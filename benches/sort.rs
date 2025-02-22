@@ -1,5 +1,5 @@
 use criterion::{
-	black_box, criterion_group, criterion_main, AxisScale, BatchSize, Criterion, PlotConfiguration,
+	AxisScale, BatchSize, Criterion, PlotConfiguration, black_box, criterion_group, criterion_main,
 };
 use ndarray::prelude::*;
 use ndarray_slice::Slice1Ext;

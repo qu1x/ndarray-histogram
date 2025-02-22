@@ -44,13 +44,12 @@
 //! [`Rice`]: struct.Rice.html
 //! [`Sqrt`]: struct.Sqrt.html
 //! [iqr]: https://www.wikiwand.com/en/Interquartile_range
-#![warn(missing_docs, clippy::all, clippy::pedantic)]
 
 use crate::{
-	histogram::{errors::BinsBuildError, Bins, Edges},
-	quantile::{interpolate::Nearest, Quantile1dExt, QuantileExt},
+	histogram::{Bins, Edges, errors::BinsBuildError},
+	quantile::{Quantile1dExt, QuantileExt, interpolate::Nearest},
 };
-use ndarray::{prelude::*, Data};
+use ndarray::{Data, prelude::*};
 use num_traits::{FromPrimitive, NumOps, ToPrimitive, Zero};
 
 /// A trait implemented by all strategies to build [`Bins`] with parameters inferred from
@@ -640,16 +639,20 @@ mod sqrt_tests {
 
 	#[test]
 	fn constant_array_are_bad() {
-		assert!(Sqrt::from_array(&array![1, 1, 1, 1, 1, 1, 1])
-			.unwrap_err()
-			.is_strategy());
+		assert!(
+			Sqrt::from_array(&array![1, 1, 1, 1, 1, 1, 1])
+				.unwrap_err()
+				.is_strategy()
+		);
 	}
 
 	#[test]
 	fn empty_arrays_are_bad() {
-		assert!(Sqrt::<usize>::from_array(&array![])
-			.unwrap_err()
-			.is_empty_input());
+		assert!(
+			Sqrt::<usize>::from_array(&array![])
+				.unwrap_err()
+				.is_empty_input()
+		);
 	}
 }
 
@@ -660,16 +663,20 @@ mod rice_tests {
 
 	#[test]
 	fn constant_array_are_bad() {
-		assert!(Rice::from_array(&array![1, 1, 1, 1, 1, 1, 1])
-			.unwrap_err()
-			.is_strategy());
+		assert!(
+			Rice::from_array(&array![1, 1, 1, 1, 1, 1, 1])
+				.unwrap_err()
+				.is_strategy()
+		);
 	}
 
 	#[test]
 	fn empty_arrays_are_bad() {
-		assert!(Rice::<usize>::from_array(&array![])
-			.unwrap_err()
-			.is_empty_input());
+		assert!(
+			Rice::<usize>::from_array(&array![])
+				.unwrap_err()
+				.is_empty_input()
+		);
 	}
 }
 
@@ -680,16 +687,20 @@ mod sturges_tests {
 
 	#[test]
 	fn constant_array_are_bad() {
-		assert!(Sturges::from_array(&array![1, 1, 1, 1, 1, 1, 1])
-			.unwrap_err()
-			.is_strategy());
+		assert!(
+			Sturges::from_array(&array![1, 1, 1, 1, 1, 1, 1])
+				.unwrap_err()
+				.is_strategy()
+		);
 	}
 
 	#[test]
 	fn empty_arrays_are_bad() {
-		assert!(Sturges::<usize>::from_array(&array![])
-			.unwrap_err()
-			.is_empty_input());
+		assert!(
+			Sturges::<usize>::from_array(&array![])
+				.unwrap_err()
+				.is_empty_input()
+		);
 	}
 }
 
@@ -700,9 +711,11 @@ mod fd_tests {
 
 	#[test]
 	fn constant_array_are_bad() {
-		assert!(FreedmanDiaconis::from_array(&array![1, 1, 1, 1, 1, 1, 1])
-			.unwrap_err()
-			.is_strategy());
+		assert!(
+			FreedmanDiaconis::from_array(&array![1, 1, 1, 1, 1, 1, 1])
+				.unwrap_err()
+				.is_strategy()
+		);
 	}
 
 	#[test]
@@ -716,9 +729,11 @@ mod fd_tests {
 
 	#[test]
 	fn empty_arrays_are_bad() {
-		assert!(FreedmanDiaconis::<usize>::from_array(&array![])
-			.unwrap_err()
-			.is_empty_input());
+		assert!(
+			FreedmanDiaconis::<usize>::from_array(&array![])
+				.unwrap_err()
+				.is_empty_input()
+		);
 	}
 }
 
@@ -729,9 +744,11 @@ mod auto_tests {
 
 	#[test]
 	fn constant_array_are_bad() {
-		assert!(Auto::from_array(&array![1, 1, 1, 1, 1, 1, 1])
-			.unwrap_err()
-			.is_strategy());
+		assert!(
+			Auto::from_array(&array![1, 1, 1, 1, 1, 1, 1])
+				.unwrap_err()
+				.is_strategy()
+		);
 	}
 
 	#[test]
@@ -741,8 +758,10 @@ mod auto_tests {
 
 	#[test]
 	fn empty_arrays_are_bad() {
-		assert!(Auto::<usize>::from_array(&array![])
-			.unwrap_err()
-			.is_empty_input());
+		assert!(
+			Auto::<usize>::from_array(&array![])
+				.unwrap_err()
+				.is_empty_input()
+		);
 	}
 }

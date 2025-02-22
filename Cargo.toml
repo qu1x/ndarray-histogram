@@ -1,8 +1,8 @@
 [package]
 name = "ndarray-histogram"
-version = "0.4.0"
-rust-version = "1.74.0"
-edition = "2021"
+version = "0.5.0"
+rust-version = "1.85.0"
+edition = "2024"
 authors = ["Rouven Spreckels <rs@qu1x.dev>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/qu1x/ndarray-histogram"
@@ -14,12 +14,12 @@ categories = ["data-structures", "science"]
 
 [dependencies]
 ndarray = "0.16.1"
-ndarray-slice = { version = "0.4.0", default-features = false, features = ["std"] }
-ordered-float = "4.2.2"
+ndarray-slice = { version = "0.5.1", default-features = false, features = ["std"] }
+ordered-float = "5.0.0"
 num-integer = "0.1.46"
 num-traits = "0.2.19"
-rand = "0.8.5"
-itertools = { version = "0.13.0", default-features = false }
+rand = "0.9.0"
+itertools = { version = "0.14.0", default-features = false }
 rayon = { version = "1.10.0", optional = true }
 
 [dev-dependencies]

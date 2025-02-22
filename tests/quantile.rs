@@ -2,9 +2,10 @@ use itertools::izip;
 use ndarray::array;
 use ndarray::prelude::*;
 use ndarray_histogram::{
+	O64, Quantile1dExt, QuantileExt,
 	errors::{EmptyInput, MinMaxError, QuantileError},
 	interpolate::{Higher, Interpolate, Linear, Lower, Midpoint, Nearest},
-	o64, Quantile1dExt, QuantileExt, O64,
+	o64,
 };
 use quickcheck::TestResult;
 use quickcheck_macros::quickcheck;

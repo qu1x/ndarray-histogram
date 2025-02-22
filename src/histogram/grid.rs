@@ -1,5 +1,3 @@
-#![warn(missing_docs, clippy::all, clippy::pedantic)]
-
 use super::{bins::Bins, errors::BinsBuildError, strategies::BinsBuildingStrategy};
 use itertools::izip;
 use ndarray::{ArrayBase, Axis, Data, Ix1, Ix2};
@@ -61,10 +59,10 @@ use std::ops::Range;
 /// a given [`strategy`], and generating a [`histogram`]:
 ///
 /// ```
-/// use ndarray::{array, Array};
+/// use ndarray::{Array, array};
 /// use ndarray_histogram::{
-/// 	histogram::{strategies::Auto, Bins, Edges, Grid, GridBuilder},
 /// 	HistogramExt,
+/// 	histogram::{Bins, Edges, Grid, GridBuilder, strategies::Auto},
 /// };
 ///
 /// // 1-dimensional observations, as a (n_observations, n_dimension) 2-d matrix
@@ -284,7 +282,7 @@ impl<A: Ord + Send + Clone> Grid<A> {
 ///
 /// ```
 /// use ndarray::Array;
-/// use ndarray_histogram::histogram::{strategies::Auto, Bins, Edges, Grid, GridBuilder};
+/// use ndarray_histogram::histogram::{Bins, Edges, Grid, GridBuilder, strategies::Auto};
 ///
 /// // 1-dimensional observations, as a (n_observations, n_dimension) 2-d matrix
 /// let observations =

@@ -1,4 +1,4 @@
-use self::interpolate::{higher_index, lower_index, Interpolate};
+use self::interpolate::{Interpolate, higher_index, lower_index};
 use crate::errors::QuantileError;
 use crate::errors::{EmptyInput, MinMaxError, MinMaxError::UndefinedOrder};
 use crate::{MaybeNan, MaybeNanExt};
@@ -179,11 +179,11 @@ where
 	/// two data points: we return the lower, nearest, higher or interpolated
 	/// value depending on the `interpolate` strategy.
 	///
-	/// Some examples:
-	/// - `q=0.` returns the minimum along each 1-dimensional lane;
-	/// - `q=0.5` returns the median along each 1-dimensional lane;
-	/// - `q=1.` returns the maximum along each 1-dimensional lane.
-	/// (`q=0` and `q=1` are considered improper quantiles)
+	/// Some examples (`q=0` and `q=1` are considered improper quantiles):
+	///
+	///   - `q=0.` returns the minimum along each 1-dimensional lane;
+	///   - `q=0.5` returns the median along each 1-dimensional lane;
+	///   - `q=1.` returns the maximum along each 1-dimensional lane.
 	///
 	/// The array is shuffled **in place** along each 1-dimensional lane in
 	/// order to produce the required quantile without allocating a copy
@@ -193,8 +193,10 @@ where
 	/// after this computation.
 	///
 	/// Complexity ([quickselect](https://en.wikipedia.org/wiki/Quickselect)):
-	/// - average case: O(`m`);
-	/// - worst case: O(`m`^2);
+	///
+	///   - average case: O(`m`);
+	///   - worst case: O(`m`^2);
+	///
 	/// where `m` is the number of elements in the array.
 	///
 	/// Returns `Err(EmptyInput)` when the specified axis has length 0.
@@ -235,8 +237,8 @@ where
 	/// # Example
 	///
 	/// ```rust
-	/// use ndarray::{array, aview1, Axis};
-	/// use ndarray_histogram::{interpolate::Nearest, QuantileExt};
+	/// use ndarray::{Axis, array, aview1};
+	/// use ndarray_histogram::{QuantileExt, interpolate::Nearest};
 	///
 	/// let mut data = array![[3, 4, 5], [6, 7, 8]];
 	/// let axis = Axis(1);
@@ -591,11 +593,11 @@ where
 	/// two data points: we return the lower, nearest, higher or interpolated
 	/// value depending on the `interpolate` strategy.
 	///
-	/// Some examples:
-	/// - `q=0.` returns the minimum;
-	/// - `q=0.5` returns the median;
-	/// - `q=1.` returns the maximum.
-	/// (`q=0` and `q=1` are considered improper quantiles)
+	/// Some examples (`q=0` and `q=1` are considered improper quantiles):
+	///
+	///   - `q=0.` returns the minimum;
+	///   - `q=0.5` returns the median;
+	///   - `q=1.` returns the maximum.
 	///
 	/// The array is shuffled **in place** in order to produce the required quantile
 	/// without allocating a copy.
@@ -603,8 +605,10 @@ where
 	/// after this computation.
 	///
 	/// Complexity ([quickselect](https://en.wikipedia.org/wiki/Quickselect)):
-	/// - average case: O(`m`);
-	/// - worst case: O(`m`^2);
+	///
+	///   - average case: O(`m`),
+	///   - worst case: O(`m`^2),
+	///
 	/// where `m` is the number of elements in the array.
 	///
 	/// Returns `Err(EmptyInput)` if the array is empty.

@@ -9,11 +9,12 @@
 	rustdoc::broken_intra_doc_links,
 	rustdoc::missing_crate_level_docs
 )]
+#![allow(clippy::tabs_in_doc_comments)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 pub use crate::histogram::HistogramExt;
-pub use crate::maybe_nan::{n32, n64, o32, o64, MaybeNan, MaybeNanExt, N32, N64, O32, O64};
-pub use crate::quantile::{interpolate, Quantile1dExt, QuantileExt};
+pub use crate::maybe_nan::{MaybeNan, MaybeNanExt, N32, N64, O32, O64, n32, n64, o32, o64};
+pub use crate::quantile::{Quantile1dExt, QuantileExt, interpolate};
 
 pub use ndarray;
 

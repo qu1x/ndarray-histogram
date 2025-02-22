@@ -1,5 +1,5 @@
 use ndarray::prelude::*;
-use ndarray::{s, Data, DataMut, RemoveAxis};
+use ndarray::{Data, DataMut, RemoveAxis, s};
 use ordered_float::{NotNan, OrderedFloat};
 use std::mem;
 
@@ -128,29 +128,31 @@ fn remove_nan_mut<A: MaybeNan>(mut view: ArrayViewMut1<'_, A>) -> ArrayViewMut1<
 ///
 /// The caller must ensure that qll elements in `view` are valid values for type `U`.
 unsafe fn cast_view_mut<T, U>(mut view: ArrayViewMut1<'_, T>) -> ArrayViewMut1<'_, U> {
-	assert_eq!(mem::size_of::<T>(), mem::size_of::<U>());
-	assert_eq!(mem::align_of::<T>(), mem::align_of::<U>());
-	let ptr: *mut U = view.as_mut_ptr().cast();
-	let len: usize = view.len_of(Axis(0));
-	let stride: isize = view.stride_of(Axis(0));
-	if len <= 1 {
-		// We can use a stride of `0` because the stride is irrelevant for the `len == 1` case.
-		let stride = 0;
-		ArrayViewMut1::from_shape_ptr([len].strides([stride]), ptr)
-	} else if stride >= 0 {
-		let stride = stride as usize;
-		ArrayViewMut1::from_shape_ptr([len].strides([stride]), ptr)
-	} else {
-		// At this point, stride < 0. We have to construct the view by using the inverse of the
-		// stride and then inverting the axis, since `ArrayViewMut::from_shape_ptr` requires the
-		// stride to be nonnegative.
-		let neg_stride = stride.checked_neg().unwrap() as usize;
-		// This is safe because `ndarray` guarantees that it's safe to offset the
-		// pointer anywhere in the array.
-		let neg_ptr = ptr.offset((len - 1) as isize * stride);
-		let mut v = ArrayViewMut1::from_shape_ptr([len].strides([neg_stride]), neg_ptr);
-		v.invert_axis(Axis(0));
-		v
+	unsafe {
+		assert_eq!(mem::size_of::<T>(), mem::size_of::<U>());
+		assert_eq!(mem::align_of::<T>(), mem::align_of::<U>());
+		let ptr: *mut U = view.as_mut_ptr().cast();
+		let len: usize = view.len_of(Axis(0));
+		let stride: isize = view.stride_of(Axis(0));
+		if len <= 1 {
+			// We can use a stride of `0` because the stride is irrelevant for the `len == 1` case.
+			let stride = 0;
+			ArrayViewMut1::from_shape_ptr([len].strides([stride]), ptr)
+		} else if stride >= 0 {
+			let stride = stride as usize;
+			ArrayViewMut1::from_shape_ptr([len].strides([stride]), ptr)
+		} else {
+			// At this point, stride < 0. We have to construct the view by using the inverse of the
+			// stride and then inverting the axis, since `ArrayViewMut::from_shape_ptr` requires the
+			// stride to be nonnegative.
+			let neg_stride = stride.checked_neg().unwrap() as usize;
+			// This is safe because `ndarray` guarantees that it's safe to offset the
+			// pointer anywhere in the array.
+			let neg_ptr = ptr.offset((len - 1) as isize * stride);
+			let mut v = ArrayViewMut1::from_shape_ptr([len].strides([neg_stride]), neg_ptr);
+			v.invert_axis(Axis(0));
+			v
+		}
 	}
 }
 
@@ -177,7 +179,7 @@ macro_rules! impl_maybenan_for_fxx {
 			#[inline]
 			fn from_not_nan_opt(value: Option<$Nxx>) -> $fxx {
 				match value {
-					None => ::std::$fxx::NAN,
+					None => $fxx::NAN,
 					Some(num) => *num,
 				}
 			}
@@ -185,7 +187,7 @@ macro_rules! impl_maybenan_for_fxx {
 			#[inline]
 			fn from_not_nan_ref_opt(value: Option<&$Nxx>) -> &$fxx {
 				match value {
-					None => &::std::$fxx::NAN,
+					None => &$fxx::NAN,
 					Some(num) => num.as_ref(),
 				}
 			}
@@ -224,7 +226,7 @@ impl MaybeNan for O32 {
 	#[inline]
 	fn from_not_nan_opt(value: Option<N32>) -> O32 {
 		match value {
-			None => o32(::std::f32::NAN),
+			None => o32(f32::NAN),
 			Some(num) => o32(*num),
 		}
 	}
@@ -232,7 +234,7 @@ impl MaybeNan for O32 {
 	#[inline]
 	fn from_not_nan_ref_opt(value: Option<&N32>) -> &O32 {
 		match value {
-			None => unsafe { mem::transmute::<&f64, &O32>(&::std::f64::NAN) },
+			None => unsafe { mem::transmute::<&f64, &O32>(&f64::NAN) },
 			Some(num) => unsafe { mem::transmute::<&N32, &O32>(num) },
 		}
 	}
@@ -267,7 +269,7 @@ impl MaybeNan for O64 {
 	#[inline]
 	fn from_not_nan_opt(value: Option<N64>) -> O64 {
 		match value {
-			None => o64(::std::f64::NAN),
+			None => o64(f64::NAN),
 			Some(num) => o64(*num),
 		}
 	}
@@ -275,7 +277,7 @@ impl MaybeNan for O64 {
 	#[inline]
 	fn from_not_nan_ref_opt(value: Option<&N64>) -> &O64 {
 		match value {
-			None => unsafe { mem::transmute::<&f64, &O64>(&::std::f64::NAN) },
+			None => unsafe { mem::transmute::<&f64, &O64>(&f64::NAN) },
 			Some(num) => unsafe { mem::transmute::<&N64, &O64>(num) },
 		}
 	}

@@ -1,5 +1,3 @@
-#![warn(missing_docs, clippy::all, clippy::pedantic)]
-
 use ndarray::prelude::*;
 use std::ops::{Index, Range};
 
@@ -145,7 +143,7 @@ impl<A: Ord + Send> Edges<A> {
 	/// # Examples
 	///
 	/// ```
-	/// use ndarray_histogram::{histogram::Edges, o64, O64};
+	/// use ndarray_histogram::{O64, histogram::Edges, o64};
 	///
 	/// let edges = Edges::<O64>::from(vec![]);
 	/// assert_eq!(edges.is_empty(), true);
@@ -178,9 +176,15 @@ impl<A: Ord + Send> Edges<A> {
 	/// contains the given `value`, or returns `None` otherwise.
 	///
 	/// That is to say, it returns
-	/// - `Some((left, right))`, where `left` and `right` are the indices of two consecutive edges
-	/// in `self` and `right == left + 1`, if `self[left] <= value < self[right]`;
-	/// - `None`, otherwise.
+	///
+	///   - `Some((left, right))`,
+	///
+	/// where `left` and `right` are the indices of two consecutive edges in `self` and
+	/// `right == left + 1`, if `self[left] <= value < self[right]` it returns
+	///
+	///   - `None`,
+	///
+	/// else otherwise.
 	///
 	/// # Examples
 	///
@@ -278,8 +282,9 @@ impl<A: Ord + Send> Bins<A> {
 	///
 	/// ```
 	/// use ndarray_histogram::{
+	/// 	O64,
 	/// 	histogram::{Bins, Edges},
-	/// 	o64, O64,
+	/// 	o64,
 	/// };
 	///
 	/// // At least 2 edges is needed to represent 1 interval
